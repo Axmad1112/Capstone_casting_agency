@@ -1,21 +1,14 @@
 import json
-from flask import request, _request_ctx_stack
+from flask import request, _request_ctx_stack,abort
 from functools import wraps
-from jose import jwt
 from urllib.request import urlopen
 import os
+from jose import jwt
 
 
-# get auth0 params from the envieonmental variables if available
-AUTH0_DOMAIN = os.environ.get('AUTH0_DOMAIN')
-ALGORITHMS = os.environ.get('ALGORITHMS')
-API_AUDIENCE = os.environ.get('API_AUDIENCE')
-
-# AuthError Exception
-'''
-AuthError Exception
-A standardized way to communicate auth failure modes
-'''
+AUTH0_DOMAIN = 'casting-agency1112.us.auth0.com'
+ALGORITHMS = ['RS256']
+API_AUDIENCE = 'Casting_agency'
 
 
 class AuthError(Exception):
@@ -24,63 +17,20 @@ class AuthError(Exception):
         self.status_code = status_code
 
 
-# Auth Header
-
-'''
-get_token_auth_header() method
-    it attempt to get the header from the request
-        it raise an AuthError if no header is present
-    it attempt to split bearer and the token
-        it raise an AuthError if the header is malformed
-    return the token part of the header
-'''
-
-
 def get_token_auth_header():
-    """Obtains the Access Token from the Authorization Header
-    """
-    # print(request.headers)
-    auth = request.headers.get('Authorization', None)
-    if not auth:
-        raise AuthError({
-            'code': 'authorization_header_missing',
-            'description': 'Authorization header is expected.'
-        }, 401)
+    if "Authorization" not in request.headers:
+        abort(401)
 
-    parts = auth.split()
-    if parts[0].lower() != 'bearer':
-        raise AuthError({
-            'code': 'invalid_header',
-            'description': 'Authorization header must start with "Bearer".'
-        }, 401)
+    auth_header = request.headers["Authorization"]
+    header_parts = auth_header.split(" ")
 
-    elif len(parts) == 1:
-        raise AuthError({
-            'code': 'invalid_header',
-            'description': 'Token not found.'
-        }, 401)
+    if len(header_parts) !=2 :
+        abort(401)
+    elif header_parts[0].lower() != "bearer":
+        abort(401)
 
-    elif len(parts) > 2:
-        raise AuthError({
-            'code': 'invalid_header',
-            'description': 'Authorization header must be bearer token.'
-        }, 401)
+    return header_parts[1]
 
-    token = parts[1]
-    return token
-
-
-'''
-check_permissions(permission, payload) method
-    @INPUTS
-        permission: string permission (i.e. 'post:drink')
-        payload: decoded jwt payload
-
-    it raise an AuthError if permissions are not included in the payload
-    it raise an AuthError if the requested permission string is not in
-    the payload permissions array
-    return true otherwise
-'''
 
 
 def check_permissions(permission, payload):
@@ -94,21 +44,8 @@ def check_permissions(permission, payload):
         raise AuthError({
             'code': 'unauthorized',
             'description': 'Permission not found.'
-        }, 401)
+        }, 403)
     return True
-
-
-'''
-verify_decode_jwt(token) method
-    @INPUTS
-        token: a json web token (string)
-
-    it should be an Auth0 token with key id (kid)
-    it verify the token using Auth0 /.well-known/jwks.json
-    it decode the payload from the token
-    it validate the claims
-    return the decoded payload
-'''
 
 
 def verify_decode_jwt(token):
@@ -152,8 +89,7 @@ def verify_decode_jwt(token):
         except jwt.JWTClaimsError:
             raise AuthError({
                 'code': 'invalid_claims',
-                'description': '''Incorrect claims. Please, check the audience
-                and issuer.'''
+                'description': 'Incorrect claims. Please, check the audience and issuer.'
             }, 401)
         except Exception:
             raise AuthError({
@@ -166,28 +102,17 @@ def verify_decode_jwt(token):
     }, 400)
 
 
-'''
-@requires_auth(permission) decorator method
-    @INPUTS
-        permission: string permission (i.e. 'get:movies')
-
-    it use the get_token_auth_header method to get the token
-    it use the verify_decode_jwt method to decode the jwt
-    it use the check_permissions method validate claims and
-    check the requested permission
-    return the decorator which passes the decoded payload to the
-    decorated method
-'''
-
-
 def requires_auth(permission=''):
     def requires_auth_decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
             token = get_token_auth_header()
-            payload = verify_decode_jwt(token)
+            try:
+                payload = verify_decode_jwt(token)
+            except:
+                abort(401)
             check_permissions(permission, payload)
-            return f(payload, *args, **kwargs)
+            return f(payload, *args, **kwargs) 
 
         return wrapper
     return requires_auth_decorator
