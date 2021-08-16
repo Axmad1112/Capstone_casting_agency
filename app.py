@@ -239,6 +239,21 @@ def create_app(test_config=None):
             incorrect or corrupted"""
         }), 400
 
+    @app.errorhandler(401)
+    def unauthorized(e):
+        return {
+            "success": False,
+            "error_code": 401,
+            "error_message": "Unauthorized"
+        }, 401
+
+    @app.errorhandler(403)
+    def foribdden(error):
+        return jsonify({
+            "success": False,
+            "error": 403,
+            "message": "Foribdden"
+        }), 403
         
     @app.errorhandler(404)
     def not_found(error):
@@ -249,7 +264,13 @@ def create_app(test_config=None):
             Web page doesn't exist"""
         }), 404
 
-
+    @app.errorhandler(405)
+    def method_not_allowed(error):
+        return jsonify({
+            "success": False,
+            "error": 405,
+            "message": "Method Not Allowed"
+        }), 405
 
     @app.errorhandler(422)
     def unprocessable(error):

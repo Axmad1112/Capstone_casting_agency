@@ -1,3 +1,6 @@
+export DATABASE_URL='postgresql://postgres:admin@localhost:5432/casting_agency'
+export AUTH0_CLIENT_ID='2lCOflqdp1YiAD643fLikVjxBeACF1mD'
+export AUTH0_CLIENT_SECRET='ZjSprcF7R2AHms2yErTPrhiaa4dYg4n36hsN863zeMcopxmpLIjdJG9JhyWsQH2T'
 export AUTH0_DOMAIN='casting-agency1112.us.auth0.com'
 export ALGORITHMS=['RS256']
 export API_AUDIENCE='Casting_agency'
