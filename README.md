@@ -3,10 +3,20 @@
 
 Udacity Full Stack Nanodegree capstone project - casting_agency
 
-# Heroku address
+# Heroku URL
 
 https://ahmad1112.herokuapp.com/
 
+# Heroku deployed
+
+open git bash console
+
+- heroku create ahmad1112
+- git remote add heroku https://git.heroku.com/ahmad1112.git
+- heroku addons:create heroku-postgresql:hobby-dev --app ahmad1112
+- git push heroku branch_name
+
+OATH login url. There are three logins atm, JWTs for these appear in the url after successfull login. Those tokens are needed to test the different APIs.
 
 # Motivation
 
@@ -32,7 +42,7 @@ Note: you must have the latest version of Python
 # Local Database connection
 
 - You need to install and start postgres database.
-- You need to update the database_params variable found in config.py file as shown below:
+- You need to update the database_param variable found in config.py file as shown below:
 
 python
 database_param = {
@@ -46,6 +56,7 @@ Note: you can create a db named casting_agency by using createdb command as show
 
 bash
 createdb -U postgres casting_agency
+
 
 # Auth0 configs
 

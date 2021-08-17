@@ -1,14 +1,14 @@
 import json
-from flask import request, _request_ctx_stack,abort
+from flask import request, _request_ctx_stack, abort
 from functools import wraps
 from urllib.request import urlopen
 import os
 from jose import jwt
 
 
-AUTH0_DOMAIN = 'casting-agency1112.us.auth0.com'
-ALGORITHMS = ['RS256']
-API_AUDIENCE = 'Casting_agency'
+AUTH0_DOMAIN = os.environ.get('AUTH0_DOMAIN')
+ALGORITHMS = os.environ.get('ALGORITHMS')
+API_AUDIENCE = os.environ.get('API_AUDIENCE')
 
 
 class AuthError(Exception):
@@ -24,13 +24,12 @@ def get_token_auth_header():
     auth_header = request.headers["Authorization"]
     header_parts = auth_header.split(" ")
 
-    if len(header_parts) !=2 :
+    if len(header_parts) != 2:
         abort(401)
     elif header_parts[0].lower() != "bearer":
         abort(401)
 
     return header_parts[1]
-
 
 
 def check_permissions(permission, payload):
@@ -112,7 +111,7 @@ def requires_auth(permission=''):
             except:
                 abort(401)
             check_permissions(permission, payload)
-            return f(payload, *args, **kwargs) 
+            return f(payload, *args, **kwargs)
 
         return wrapper
     return requires_auth_decorator

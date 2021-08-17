@@ -6,12 +6,11 @@ from auth import AuthError, requires_auth
 from models import setup_db, db_drop_and_create_all, \
     Actor, Movie, db
 
+
 def create_app(test_config=None):
     app = Flask(__name__)
     setup_db(app)
-    CORS(app) 
-
-
+    CORS(app)
 
     @app.after_request
     def after_request(response):
@@ -27,7 +26,7 @@ def create_app(test_config=None):
             "success": True,
             "message": "Hello, Udacity team!"
         })
-                                
+
     @app.route('/actors', methods=['GET'])
     @requires_auth('get:actors')
     def retrieve_actors(self):
@@ -39,9 +38,8 @@ def create_app(test_config=None):
             'actors': actors
         }), 200
 
-
-
     # POST /actors create a new actor
+
     @app.route('/actors', methods=['POST'])
     @requires_auth('create:actors')
     def create_new_actor(jwt):
@@ -56,7 +54,8 @@ def create_app(test_config=None):
                 try:
                     movie_id = int(movie_id)
                     actor.movie_id = movie_id
-                except ValueError: abort(400)
+                except ValueError:
+                    abort(400)
             actor.insert()
             new_actor = Actor.query.get(actor.id)
 
@@ -105,8 +104,8 @@ def create_app(test_config=None):
         finally:
             db.session.close()
 
-
     # Delete /actors/<id> delete an actor
+
     @app.route('/actors/<int:actor_id>', methods=['DELETE'])
     @requires_auth('delete:actors')
     def delete_actor(self, actor_id):
@@ -120,16 +119,16 @@ def create_app(test_config=None):
             db.session.close()
         return jsonify({
             "success": True,
-            "message" : "Delete occured"
+            "message": "Delete occured"
         })
 
-
     # GET /movies get movies with their actors endpoint
+
     @app.route('/movies', methods=['GET'])
     @requires_auth('get:movies')
     def retrieve_movies(self):
         movies_all = Movie.query.order_by(Movie.id).all()
-        
+
         movies = [movie.format() for movie in movies_all]
 
         # if len(movies) == 0:
@@ -140,8 +139,8 @@ def create_app(test_config=None):
             'movies': movies
         }), 200
 
-
     # POST /movies create a new movie
+
     @app.route('/movies', methods=['POST'])
     @requires_auth('create:movies')
     def create_movie(self):
@@ -149,18 +148,17 @@ def create_app(test_config=None):
         title = body.get('title', None)
         release_date = body.get('release_date', None)
 
-
         if (title is None) or (release_date is None):
             abort(400)
         try:
             movie = Movie(title=title, release_date=release_date)
             movie.insert()
             new_movie = Movie.query.get(movie.id)
-            
+
             return jsonify({
                 'success': True,
                 'created': movie.id,
-                'new_movie':new_movie.format()
+                'new_movie': new_movie.format()
             }), 200
 
         except:
@@ -189,28 +187,30 @@ def create_app(test_config=None):
         movie.update()
 
         return jsonify({
-                'success': True,
-                'movie': movie.format()
-            }), 200
+            'success': True,
+            'movie': movie.format()
+        }), 200
 
         #     db.session.rollback()
         #     abort(422)
         # finally:
         #     db.session.close()
 
-
     # Delete /movies/<id> delete a movie
+
     @app.route('/movies/<int:movie_id>', methods=['DELETE'])
     @requires_auth('delete:movies')
     def delete_movie(self, movie_id):
         movie = Movie.query.get_or_404(movie_id)
-        try: movie.delete()
-        except: abort(422)
+        try:
+            movie.delete()
+        except:
+            abort(422)
         finally:
             db.session.close()
         return jsonify({
             "success": True,
-            "message" : "Delete occured"
+            "message": "Delete occured"
         })
 
     # Health check endpoint
@@ -218,8 +218,8 @@ def create_app(test_config=None):
     def health_check():
         return jsonify("Health Check for the API")
 
-
     # error handler for AuthError
+
     @app.errorhandler(AuthError)
     def auth_error(error):
         return jsonify({
@@ -254,7 +254,7 @@ def create_app(test_config=None):
             "error": 403,
             "message": "Foribdden"
         }), 403
-        
+
     @app.errorhandler(404)
     def not_found(error):
         return jsonify({

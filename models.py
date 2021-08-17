@@ -6,14 +6,15 @@ import os
 from os import getenv
 
 
-# database_path = "{}://{}:{}@localhost: 5432/{}".format(
-#                                    database_param["dialect"],
-#                                    database_param["username"],
-#                                    database_param["password"],
-#                                    database_param["db_name"])
+database_path = "{}://{}:{}@localhost: 5432/{}".format(
+    database_param["dialect"],
+    database_param["username"],
+    database_param["password"],
+    database_param["db_name"])
 
-database_path = getenv("DATABASE_URI")
+# database_path = getenv("DATABASE_URI")
 db = SQLAlchemy()
+
 
 def setup_db(app, database_path=database_path):
     app.config["SQLALCHEMY_DATABASE_URI"] = database_path
@@ -22,10 +23,10 @@ def setup_db(app, database_path=database_path):
     db.init_app(app)
     return db
 
+
 def db_drop_and_create_all():
     db.drop_all()
     db.create_all()
-
 
 
 class Actor(db.Model):
@@ -35,7 +36,6 @@ class Actor(db.Model):
     age = db.Column(db.Integer(), nullable=False)
     gender = db.Column(db.String(), nullable=False)
     movie_id = db.Column(db.Integer, db.ForeignKey('movies.id'), nullable=True)
-
 
     def insert(self):
         db.session.add(self)
@@ -73,7 +73,6 @@ class Movie(db.Model):
         self.title = title
         self.release_date = release_date
 
-
     def insert(self):
         db.session.add(self)
         db.session.commit()
@@ -81,7 +80,6 @@ class Movie(db.Model):
     def delete(self):
         db.session.delete(self)
         db.session.commit()
-
 
     def update(self):
         db.session.commit()

@@ -8,12 +8,11 @@ from app import app
 import json
 
 
-
 database_path = "{}://{}:{}@localhost:5432/{}".format(
-                                   database_param["dialect"],
-                                   database_param["username"],
-                                   database_param["password"],
-                                   database_param["db_name"])
+    database_param["dialect"],
+    database_param["username"],
+    database_param["password"],
+    database_param["db_name"])
 
 casting_assistant = jwt_value.casting_assistant
 casting_director = jwt_value.casting_director
@@ -59,12 +58,14 @@ class MainTestCase(unittest.TestCase):
 
     def test_get_movies(self):
         res = self.client.get(
-            '/actors', headers={"Authorization": f"Bearer {casting_assistant}"})
+            '/actors', headers={
+                "Authorization": f"Bearer {casting_assistant}"})
         self.assertEqual(res.status_code, 200)
 
     def test_add_movie(self):
         res = self.client.post(
-            '/movies', json=self.movie_data, headers=set_auth_header('producer'))
+            '/movies', json=self.movie_data,
+            headers=set_auth_header('producer'))
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -78,16 +79,16 @@ class MainTestCase(unittest.TestCase):
 
     def test_add_movie_forbidden(self):
         res = self.client.post(
-            '/movies', json=self.movie_data, headers=set_auth_header('assistant'))
+            '/movies', json=self.movie_data,
+            headers=set_auth_header('assistant'))
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 403)
         self.assertEqual(data["success"], False)
 
-
     def test_edit_movie(self):
         movie_id = Movie.query.all()[0]
         res = self.client.patch(f'/movies/{movie_id.id}', json=self.movie_data,
-            headers=set_auth_header('producer'))
+                                headers=set_auth_header('producer'))
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -102,10 +103,10 @@ class MainTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 403)
 
     def test_delete_movie(self):
-        movie_id = Movie.query.all()[-1] # eng oxirgi element
+        movie_id = Movie.query.all()[-1]  # eng oxirgi element
         res = self.client.delete(
             f'/movies/{movie_id.id}',
-            headers=set_auth_header('producer')) # data jo'natmaymiz
+            headers=set_auth_header('producer'))  # data jo'natmaymiz
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -132,7 +133,8 @@ class MainTestCase(unittest.TestCase):
 
     def test_add_actor(self):
         res = self.client.post(
-            '/actors', json=self.actor_data, headers=set_auth_header('producer'))
+            '/actors', json=self.actor_data,
+            headers=set_auth_header('producer'))
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -146,7 +148,8 @@ class MainTestCase(unittest.TestCase):
 
     def test_add_actor_forbidden(self):
         res = self.client.post(
-            '/actors', json=self.actor_data, headers=set_auth_header('assistant'))
+            '/actors', json=self.actor_data,
+            headers=set_auth_header('assistant'))
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 403)
 
@@ -159,7 +162,7 @@ class MainTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
 
-    def test_edit_actor_forbidden(self): 
+    def test_edit_actor_forbidden(self):
         actor_id = Actor.query.first().id
         res = self.client.patch(
             f'/actors/{actor_id}', json=self.actor_data,
@@ -167,7 +170,7 @@ class MainTestCase(unittest.TestCase):
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 403)
 
-    def test_edit_actor_fail(self): 
+    def test_edit_actor_fail(self):
         actor_id = Actor.query.first().id
         res = self.client.patch(
             f'/actors/{actor_id}', data={},
