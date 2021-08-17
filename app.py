@@ -68,6 +68,7 @@ def create_app(test_config=None):
             abort(400)
 
     # PATCH /actors/<id> update an actor
+
     @app.route('/actors/<int:actor_id>', methods=['PATCH'])
     @requires_auth('update:actors')
     def update_actor(self, actor_id):
@@ -90,15 +91,13 @@ def create_app(test_config=None):
                 actor.gender = gender
             if movie_id is not None:
                 actor.movie_id = movie_id
-
             actor.update()
-
             return jsonify({
                 'success': True,
                 'actor': actor.get_format_json()
             }), 200
 
-        except:
+        except SQLAlchemyError:
             db.session.rollback()
             abort(422)
         finally:
@@ -109,11 +108,10 @@ def create_app(test_config=None):
     @app.route('/actors/<int:actor_id>', methods=['DELETE'])
     @requires_auth('delete:actors')
     def delete_actor(self, actor_id):
-        # Actor.query.filter(Actor.id == actor_id).delete() o'zgartiramiz
         actor = Actor.query.get_or_404(actor_id)
         try:
             actor.delete()
-        except:
+        except SQLAlchemyError:
             abort(422)
         finally:
             db.session.close()
@@ -124,16 +122,7 @@ def create_app(test_config=None):
 
     # GET /movies get movies with their actors endpoint
 
-    @app.route('/movies', methods=['GET'])
-    @requires_auth('get:movies')
-    def retrieve_movies(self):
-        movies_all = Movie.query.order_by(Movie.id).all()
-
         movies = [movie.format() for movie in movies_all]
-
-        # if len(movies) == 0:
-        #     abort(404)
-
         return jsonify({
             'success': True,
             'movies': movies
@@ -161,20 +150,18 @@ def create_app(test_config=None):
                 'new_movie': new_movie.format()
             }), 200
 
-        except:
+        except SQLAlchemyError:
             db.session.rollback()
             abort(422)
         finally:
             db.session.close()
 
     # PATCH /movies/<id> update a movie
+
     @app.route('/movies/<int:movie_id>', methods=['PATCH'])
     @requires_auth('update:movies')
     def update_movie(self, movie_id):
         movie = Movie.query.get_or_404(movie_id)
-
-        # if movie is None:
-        #     abort(404)
         body = request.get_json()
         title = body.get('title', None)
         release_date = body.get('release_date', None)
@@ -183,18 +170,17 @@ def create_app(test_config=None):
             movie.title = title
         if release_date is not None:
             movie.release_date = release_date
-
-        movie.update()
-
-        return jsonify({
-            'success': True,
-            'movie': movie.format()
-        }), 200
-
-        #     db.session.rollback()
-        #     abort(422)
-        # finally:
-        #     db.session.close()
+        try:
+            movie.update()
+            return jsonify({
+                'success': True,
+                'movie': movie.format()
+            }), 200
+        except SQLAlchemyError:
+            db.session.rollback()
+            abort(422)
+        finally:
+            db.session.close()
 
     # Delete /movies/<id> delete a movie
 
@@ -204,7 +190,7 @@ def create_app(test_config=None):
         movie = Movie.query.get_or_404(movie_id)
         try:
             movie.delete()
-        except:
+        except SQLAlchemyError:
             abort(422)
         finally:
             db.session.close()
@@ -214,6 +200,7 @@ def create_app(test_config=None):
         })
 
     # Health check endpoint
+
     @app.route('/health-check', methods=['POST', 'GET'])
     def health_check():
         return jsonify("Health Check for the API")

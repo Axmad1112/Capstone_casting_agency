@@ -17,7 +17,7 @@ open git bash console
 - heroku addons:create heroku-postgresql:hobby-dev --app ahmad1112
 - git push heroku branch_name
 
-OATH login url. There are three logins atm, JWTs for these appear in the url after successfull login. Those tokens are needed to test the different APIs.
+Auth0 login url. There are three logins atm, JWTs for these appear in the url after successfull login. Those tokens are needed to test the different APIs.
 
 # Motivation
 
@@ -33,10 +33,10 @@ This section will introduce you to how to run and setup the app locally.
 
 This project is based on Python and Flask.
 
-To install project dependencies:
-
-bash
-$ pip install -r requirements.txt
+To install project dependencies run following command:
+  ```bash
+     pip install -r requirements.txt
+  ```
 
 Note: you must have the latest version of Python
 
@@ -58,6 +58,53 @@ Note: you can create a db named casting_agency by using createdb command as show
 bash
 createdb -U postgres casting_agency
 
+# Authentication and authorization
+
+
+[Auth0 Applications](https://auth0.com/docs/applications)
+<br>
+[Auth0 APIs](https://auth0.com/docs/api/info)
+
+
+# Existing user roles
+
+1. Casting Assistant:
+
+- GET /actors (get:actors): can get all actors
+- GET /movies (get:movies): can get all movies
+
+email : casting_assistant@gmail.com
+password : Casting_agency1112
+
+
+2. Casting Director:
+- All permissions of Casting Assistant
+- POST /actors (create:actors): can create new actors
+- PATCH /actors (update:actors): can update existing actors
+- PATCH /movies (update:movies): can update existing movies
+- DELETE /actors (delete:actors): can delete actors from database
+
+email : casting_director@gmail.com
+password : Casting_agency1112
+
+3. Exectutive Director:
+- All permissions of Casting Director
+- POST /movies (create:movies): Can create new movies
+- DELETE /movies (delete:movies): Can delete movies from database
+
+email : executive_producer@gmail.com
+password : Casting_agency1112
+
+
+# JWT Token
+To get JWT navigate to page:
+
+[https://casting-agency1112.us.auth0.com/authorize?
+  audience=Casting_agency&
+  response_type=token&
+  client_id=2lCOflqdp1YiAD643fLikVjxBeACF1mD&
+  redirect_uri=http://127.0.0.1:8080/login-results](get jwt token)
+
 
 # Auth0 configs
 
@@ -69,24 +116,35 @@ AUTH0_DOMAIN = 'casting-agency1112.us.auth0.com'
 ALGORITHMS = ['RS256']
 API_AUDIENCE = 'Casting_agency'
 
+or
 
+```bash
+    source setup.sh
+```
 
 # Run the app locally
 
 You can run the app using the below commands:
-
-bash
-
-set FLASK_APP=app.py
-flask run
+  ```bash
+     source setup.sh
+     flask run
+  ```
+or 
+   ```bash
+      python3 wsgi.py
+   ```
 
 # Run test cases
 
 You can run the unit test cases that are defined in test_app.py using the below command:
+ ```bash
+      source setup.sh
+      export ASSITANT_TOKEN="<casting_asisstant_token>";
+      export DIRECTOR_TOKEN="<casting_director_token>";
+      export PRODUCER_TOKEN="<executive_producer_token>";
+      python test_app.py
+```
 
-bash
-
-python test_app.py
 
 # API Documentation
 
@@ -263,30 +321,3 @@ json
 
 
 
-# Authentication and authorization
-
-
-[Auth0 Applications](https://auth0.com/docs/applications)
-<br>
-[Auth0 APIs](https://auth0.com/docs/api/info)
-
-# Existing user roles
-
-
-
-1. Casting Assistant:
-
-- GET /actors (get:actors): can get all actors
-- GET /movies (get:movies): can get all movies
-
-2. Casting Director:
-- All permissions of Casting Assistant
-- POST /actors (create:actors): can create new actors
-- PATCH /actors (update:actors): can update existing actors
-- PATCH /movies (update:movies): can update existing movies
-- DELETE /actors (delete:actors): can delete actors from database
-
-3. Exectutive Director:
-- All permissions of Casting Director
-- POST /movies (create:movies): Can create new movies
-- DELETE /movies (delete:movies): Can delete movies from database
