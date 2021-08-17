@@ -11,6 +11,7 @@ https://ahmad1112.herokuapp.com/
 
 open git bash console
 
+- heroku login
 - heroku create ahmad1112
 - git remote add heroku https://git.heroku.com/ahmad1112.git
 - heroku addons:create heroku-postgresql:hobby-dev --app ahmad1112
